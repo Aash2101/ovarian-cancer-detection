@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+import statsmodels.formula.api as smf
 from sklearn.preprocessing import StandardScaler
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 
@@ -69,3 +70,30 @@ print("Features to be used in the model:", features_to_use)
 
 # This is the output of the above data wrangling and the features to be used:
 # Features to be used in the model: ['SUBJECT_ID', 'Age', 'ALB', 'CA125', 'HE4', 'LYM%', 'Menopause', 'NEU']
+
+# Reformat the title of LYM%
+reduced_df = reduced_df.rename(columns={'LYM%': 'LYM_percent'})
+
+# Establish the list of variables to loop for different logistic regression tests.
+variables = ['Age', 'ALB', 'LYM_percent', 'Menopause', 'NEU']
+
+for var in variables:
+    formula = f'TYPE ~ {var}'
+    model = smf.logit(formula, data=reduced_df)
+    result = model.fit()
+    print(f"Logistic Regression Results for {var}:")
+    print(result.summary())
+    print("\n")
+
+#For individual tests for CA125 and HE4, these variables need to undergo log transformation prior to testing.
+log_variables = ['CA125', 'HE4']
+
+for logV in log_variables:
+    formula = f'TYPE ~ np.log10({logV})'
+    model = smf.logit(formula, data=reduced_df)
+    result = model.fit()
+    print(f"Logistic Regression Results for {logV}:")
+    print(result.summary())
+    print("\n")
+
+
